@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MifareLady", "MifareLady\MifareLady.csproj", "{D0D99D7B-FFE0-4313-ADF2-25418896E5EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MifareLady", "Tier1\MifareLady\MifareLady.csproj", "{D0D99D7B-FFE0-4313-ADF2-25418896E5EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLiteAdapter", "SQLiteAdapter\SQLiteAdapter.csproj", "{538D2BE2-F012-45A0-A16E-7F64D2DF02AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLiteAdapter", "Tier3\SQLiteAdapter\SQLiteAdapter.csproj", "{538D2BE2-F012-45A0-A16E-7F64D2DF02AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLogic", "BusinessLogic\BusinessLogic.csproj", "{DF01F1C2-AE04-454D-A424-E7EB7378761D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLogic", "Tier2\BusinessLogic\BusinessLogic.csproj", "{DF01F1C2-AE04-454D-A424-E7EB7378761D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tier1", "Tier1", "{3D75F007-1143-4162-8337-9EBC91995FD7}"
 EndProject
