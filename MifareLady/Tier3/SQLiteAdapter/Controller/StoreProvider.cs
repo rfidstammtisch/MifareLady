@@ -1,4 +1,5 @@
-﻿using SQLiteAdapter.Models;
+﻿using NLog;
+using SQLiteAdapter.Models;
 using SQLiteAdapter.SQLFactory;
 using SQLiteAdapter.Statements;
 using SQLiteAdapter.Statements.Enums;
@@ -13,6 +14,8 @@ namespace SQLiteAdapter.Controller
 {
     public class StoreProvider
     {
+        private static Logger Log = LogManager.GetCurrentClassLogger();
+
         private static List<DataField> dataFields;
 
         public static void CreateStore(string name, Dictionary<string, DbType> fields)
@@ -97,6 +100,21 @@ namespace SQLiteAdapter.Controller
 
             if (SQLiteProvider.Provider.Single(name, statement) != null)
                 SQLiteProvider.Provider.Delete(name, statement);
+        }
+
+        public static Dictionary<string, object> GetSingle(string name, int id)
+        {
+            var primary = dataFields.FirstOrDefault(field => field.IsPrimary);
+            if (primary == null)
+            {
+                Log.Error("[StoreProvider.GetSingle] No primary field found");
+                return null;
+            }
+
+            var where = new WhereStatement();
+            where.Add(new WhereClause { FieldName = primary.ColumnName, ComparisonOperator = Comparison.Equals, Value = id });
+
+            return SQLiteProvider.Provider.Select(name, where)?.FirstOrDefault();
         }
 
         public static IList<Dictionary<string, object>> GetCompleteStore(string name, params string[] column)
