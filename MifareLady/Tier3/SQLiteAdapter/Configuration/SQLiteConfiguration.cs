@@ -26,7 +26,7 @@ namespace SQLiteAdapter.Configuration
             return new SQLiteConfiguration
             {
                 DatabaseName = "data.sqlite",
-                DatabasePath = ".",
+                DatabasePath = AppContext.BaseDirectory,
             };
         }
     }

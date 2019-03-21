@@ -17,7 +17,7 @@ namespace BusinessLogic.Controller
         {
             if (dataset == null)
             {
-                Log.Warn("[PersonController.SavePerson] try to save empty person");
+                Log.Warn("[PersonController.SavePerson] try to save empty dataset");
                 return;
             }
 
@@ -59,6 +59,25 @@ namespace BusinessLogic.Controller
             }
 
             return datasets;
+        }
+
+        public AbstractDataset GetDataset(string datasetStore, string column, object value)
+        {
+            // TODO: think about search criterias
+            var dbDataset = StoreProvider.GetSingle(datasetStore, column, value);
+            var datasetType = Type.GetType($"BusinessLogic.Models.{datasetStore}");
+
+            var dataset = Activator.CreateInstance(datasetType);
+            foreach (var key in dbDataset.Keys)
+            {
+                var property = datasetType.GetProperty(key);
+                if (property == null)
+                    continue;
+
+                property.SetValue(dataset, dbDataset[key]);
+            }
+
+            return dataset as AbstractDataset;
         }
 
         public AbstractDataset GetDataset(string datasetStore, int id)

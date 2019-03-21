@@ -21,6 +21,16 @@ namespace SQLiteAdapter.Controller
         public static void CreateStore(string name, Dictionary<string, DbType> fields)
         {
             dataFields = new List<DataField>();
+            dataFields.Add(new DataField
+            {
+                AllowDBNull = false,
+                AutoIncrement = false,
+                IsPrimary = true,
+                ColumnName = "id",
+                DataType = DbType.Int32,
+                DefaultValue = string.Empty,
+            });
+
             foreach (var key in fields.Keys)
                 dataFields.Add(new DataField
                 {
@@ -31,8 +41,6 @@ namespace SQLiteAdapter.Controller
                     DataType = fields[key],
                     DefaultValue = string.Empty,
                 });
-
-            dataFields[0].IsPrimary = true;
 
             SQLiteProvider.Provider.CreateStore(name, dataFields);
         }
@@ -102,6 +110,21 @@ namespace SQLiteAdapter.Controller
                 SQLiteProvider.Provider.Delete(name, statement);
         }
 
+        public static Dictionary<string, object> GetSingle(string name, string columnName, object value)
+        {
+            var column = dataFields.FirstOrDefault(field => field.ColumnName == columnName);
+            if (column == null)
+            {
+                Log.Error("[StoreProvider.GetSingle] No primary field found");
+                return null;
+            }
+
+            var where = new WhereStatement();
+            where.Add(new WhereClause { FieldName = column.ColumnName, ComparisonOperator = Comparison.Equals, Value = value });
+
+            return SQLiteProvider.Provider.Select(name, where)?.FirstOrDefault();
+        }
+
         public static Dictionary<string, object> GetSingle(string name, int id)
         {
             var primary = dataFields.FirstOrDefault(field => field.IsPrimary);
@@ -110,6 +133,10 @@ namespace SQLiteAdapter.Controller
                 Log.Error("[StoreProvider.GetSingle] No primary field found");
                 return null;
             }
+
+            // create default store with no columns
+            var dbTypes = new Dictionary<string, DbType>();
+            CreateStore(name, dbTypes);
 
             var where = new WhereStatement();
             where.Add(new WhereClause { FieldName = primary.ColumnName, ComparisonOperator = Comparison.Equals, Value = id });
@@ -120,6 +147,10 @@ namespace SQLiteAdapter.Controller
         public static IList<Dictionary<string, object>> GetCompleteStore(string name, params string[] column)
         {
             var columns = column == null || column.Length == 0 ? "*" : string.Join(", ", column);
+
+            // create default table with no columns
+            var dbTypes = new Dictionary<string, DbType>();
+            CreateStore(name, dbTypes);
 
             return SQLiteProvider.Provider.Select(name, null, null, false, columns);
         }

@@ -16,6 +16,14 @@ namespace MifareLady.Controllers
         }
 
         [HttpGet]
+        [Route("{store}/{column}/{vlaue}")]
+        public object GetDatastoreObject(string store, string column, string value)
+        {
+            var datasetController = new DatasetController();
+            return datasetController.GetDataset(store, column, value);
+        }
+
+        [HttpGet]
         [Route("{store}")]
         public object GetDatastoreObjects(string store)
         {
@@ -25,7 +33,7 @@ namespace MifareLady.Controllers
 
         [HttpPost]
         [Route("{store}")]
-        public void SaveDatastoreObject(AbstractDataset dataset)
+        public void SaveDatastoreObject(string store, AbstractDataset dataset)
         {
             var datasetController = new DatasetController();
             datasetController.SaveDataset(dataset);
@@ -33,11 +41,11 @@ namespace MifareLady.Controllers
 
         [HttpDelete]
         [Route("{store}")]
-        public void DeleteDatastoreObject(AbstractDataset dataset)
+        public void DeleteDatastoreObject(object dataset)
         {
             // TODO: Think about deleting with id
             var datasetController = new DatasetController();
-            datasetController.DeleteDataset(dataset);
+            datasetController.DeleteDataset(dataset as AbstractDataset);
         }
     }
 }
