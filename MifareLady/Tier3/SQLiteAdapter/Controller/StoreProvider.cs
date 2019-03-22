@@ -21,20 +21,10 @@ namespace SQLiteAdapter.Controller
         public static void CreateStore(string name, Dictionary<string, DbType> fields)
         {
             dataFields = new List<DataField>();
-            dataFields.Add(new DataField
-            {
-                AllowDBNull = false,
-                AutoIncrement = false,
-                IsPrimary = true,
-                ColumnName = "id",
-                DataType = DbType.Int32,
-                DefaultValue = string.Empty,
-            });
-
             foreach (var key in fields.Keys)
                 dataFields.Add(new DataField
                 {
-                    AllowDBNull = false,
+                    AllowDBNull = true,
                     AutoIncrement = false,
                     IsPrimary = false,
                     ColumnName = key,
@@ -42,14 +32,24 @@ namespace SQLiteAdapter.Controller
                     DefaultValue = string.Empty,
                 });
 
-            SQLiteProvider.Provider.CreateStore(name, dataFields);
+            if (dataFields.Count > 0)
+            {
+                dataFields[0].IsPrimary = true;
+
+                SQLiteProvider.Provider.CreateStore(name, dataFields);
+            }
         }
 
         public static void UpdateStore(string name, Dictionary<string, object> entry)
         {
             var dbTypes = new Dictionary<string, DbType>();
             foreach (var key in entry.Keys)
+            {
+                if (entry[key] == null)
+                    continue;
+
                 dbTypes[key] = GetDbType(entry[key].GetType());
+            }
 
             CreateStore(name, dbTypes);
 
@@ -88,7 +88,12 @@ namespace SQLiteAdapter.Controller
 
             var dbTypes = new Dictionary<string, DbType>();
             foreach (var key in entry.Keys)
+            {
+                if (entry[key] == null)
+                    continue;
+
                 dbTypes[key] = GetDbType(entry[key].GetType());
+            }
 
             // do not create store in deletion, because 
             // there are only two columns to share
@@ -110,7 +115,7 @@ namespace SQLiteAdapter.Controller
                 SQLiteProvider.Provider.Delete(name, statement);
         }
 
-        public static Dictionary<string, object> GetSingle(string name, string columnName, object value)
+        public static List<Dictionary<string, object>> Search(string name, string columnName, object value)
         {
             var column = dataFields.FirstOrDefault(field => field.ColumnName == columnName);
             if (column == null)
@@ -122,28 +127,9 @@ namespace SQLiteAdapter.Controller
             var where = new WhereStatement();
             where.Add(new WhereClause { FieldName = column.ColumnName, ComparisonOperator = Comparison.Equals, Value = value });
 
-            return SQLiteProvider.Provider.Select(name, where)?.FirstOrDefault();
+            return SQLiteProvider.Provider.Select(name, where).ToList();
         }
-
-        public static Dictionary<string, object> GetSingle(string name, int id)
-        {
-            var primary = dataFields.FirstOrDefault(field => field.IsPrimary);
-            if (primary == null)
-            {
-                Log.Error("[StoreProvider.GetSingle] No primary field found");
-                return null;
-            }
-
-            // create default store with no columns
-            var dbTypes = new Dictionary<string, DbType>();
-            CreateStore(name, dbTypes);
-
-            var where = new WhereStatement();
-            where.Add(new WhereClause { FieldName = primary.ColumnName, ComparisonOperator = Comparison.Equals, Value = id });
-
-            return SQLiteProvider.Provider.Select(name, where)?.FirstOrDefault();
-        }
-
+        
         public static IList<Dictionary<string, object>> GetCompleteStore(string name, params string[] column)
         {
             var columns = column == null || column.Length == 0 ? "*" : string.Join(", ", column);
