@@ -53,7 +53,21 @@ namespace BusinessLogic.Controller
                     if (property == null)
                         continue;
 
-                    property.SetValue(dataset, dbDataset[key]);
+                    var value = dbDataset[key] == DBNull.Value ? null : dbDataset[key];
+                    if(property.PropertyType == typeof(bool))
+                        switch (value)
+                        {
+                            case "0":
+                                value = false;
+                                break;
+                            case "1":
+                                value = true;
+                                break;
+                        }
+
+                    value = Convert.ChangeType(value, property.PropertyType);
+
+                    property.SetValue(dataset, value);
                 }
                 datasets.Add(dataset as AbstractDataset);
             }
@@ -61,42 +75,29 @@ namespace BusinessLogic.Controller
             return datasets;
         }
 
-        public AbstractDataset GetDataset(string datasetStore, string column, object value)
+        public List<AbstractDataset> GetDataset(string datasetStore, string column, object value)
         {
             // TODO: think about search criterias
-            var dbDataset = StoreProvider.GetSingle(datasetStore, column, value);
+            var dbDatasets = StoreProvider.Search(datasetStore, column, value);
             var datasetType = Type.GetType($"BusinessLogic.Models.{datasetStore}");
 
-            var dataset = Activator.CreateInstance(datasetType);
-            foreach (var key in dbDataset.Keys)
+            var datasets = new List<AbstractDataset>();
+            foreach (var dbDataset in dbDatasets)
             {
-                var property = datasetType.GetProperty(key);
-                if (property == null)
-                    continue;
+                var dataset = Activator.CreateInstance(datasetType);
+                foreach (var key in dbDataset.Keys)
+                {
+                    var property = datasetType.GetProperty(key);
+                    if (property == null)
+                        continue;
 
-                property.SetValue(dataset, dbDataset[key]);
+                    property.SetValue(dataset, dbDataset[key]);
+                }
+
+                datasets.Add(dataset as AbstractDataset);
             }
 
-            return dataset as AbstractDataset;
-        }
-
-        public AbstractDataset GetDataset(string datasetStore, int id)
-        {
-            // TODO: think about search criterias
-            var dbDataset = StoreProvider.GetSingle(datasetStore, id);
-            var datasetType = Type.GetType($"BusinessLogic.Models.{datasetStore}");
-
-            var dataset = Activator.CreateInstance(datasetType);
-            foreach (var key in dbDataset.Keys)
-            {
-                var property = datasetType.GetProperty(key);
-                if (property == null)
-                    continue;
-
-                property.SetValue(dataset, dbDataset[key]);
-            }
-
-            return dataset as AbstractDataset;
+            return datasets;
         }
     }
 }

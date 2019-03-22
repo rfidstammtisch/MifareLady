@@ -14,7 +14,5 @@ namespace BusinessLogic.Models
         public string Title { get; set; }
         public bool IsBlocked { get; set; }
         public byte[] Image { get; set; }
-
-        
     }
 }

@@ -12,7 +12,13 @@ namespace BusinessLogic.Models
         {
             var entry = new Dictionary<string, object>();
             foreach (var property in typeof(Person).GetProperties())
-                entry[property.Name] = property.GetValue(this);
+            {
+                var value = property.GetValue(this);
+                if (value == null)
+                    continue;
+
+                entry[property.Name] = value;
+            }
 
             return entry;
         }
