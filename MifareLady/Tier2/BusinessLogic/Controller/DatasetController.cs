@@ -54,7 +54,7 @@ namespace BusinessLogic.Controller
                         continue;
 
                     var value = dbDataset[key] == DBNull.Value ? null : dbDataset[key];
-                    if(property.PropertyType == typeof(bool))
+                    if (property.PropertyType == typeof(bool))
                         switch (value)
                         {
                             case "0":
@@ -82,7 +82,7 @@ namespace BusinessLogic.Controller
             var datasetType = Type.GetType($"BusinessLogic.Models.{datasetStore}");
 
             var datasets = new List<AbstractDataset>();
-            foreach (var dbDataset in dbDatasets)
+            foreach (var dbDataset in dbDatasets ?? new List<Dictionary<string, object>>())
             {
                 var dataset = Activator.CreateInstance(datasetType);
                 foreach (var key in dbDataset.Keys)
@@ -91,7 +91,16 @@ namespace BusinessLogic.Controller
                     if (property == null)
                         continue;
 
-                    property.SetValue(dataset, dbDataset[key]);
+                    if (dbDataset[key] != DBNull.Value)
+                    {
+                        if (property.PropertyType == typeof(bool))
+                            property.SetValue(dataset, !dbDataset[key].Equals(0));
+                        else
+                        {
+                            var result = Convert.ChangeType(dbDataset[key], property.PropertyType);
+                            property.SetValue(dataset, result);
+                        }
+                    }
                 }
 
                 datasets.Add(dataset as AbstractDataset);

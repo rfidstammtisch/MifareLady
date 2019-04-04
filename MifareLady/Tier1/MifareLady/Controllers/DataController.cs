@@ -26,6 +26,16 @@ namespace MifareLady.Controllers
         }
 
         [HttpGet]
+        [Route("{store}/{number}")]
+        public TransportDataset GetDatastoreObject(string store, string number)
+        {
+            var datasetController = new DatasetController();
+            var dataset = datasetController.GetDataset(store, "PersonNumber", number).FirstOrDefault();
+
+            return new TransportPerson(dataset as Person);
+        }
+
+        [HttpGet]
         [Route("{store}")]
         public List<TransportDataset> GetDatastoreObjects(string store)
         {
