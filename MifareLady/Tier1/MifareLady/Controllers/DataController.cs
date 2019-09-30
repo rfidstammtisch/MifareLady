@@ -11,7 +11,7 @@ namespace MifareLady.Controllers
     public class DataController : ApiController
     {
         [HttpGet]
-        [Route("{store}/column/{column}/value/{vlaue}")]
+        [Route("{store}/column/{column}/value/{value}")]
         public List<TransportDataset> GetDatastoreObject(string store, string column, string value)
         {
             var datasetController = new DatasetController();
